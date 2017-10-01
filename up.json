@@ -1,0 +1,9 @@
+{
+	"name": "hello",
+	"profile": "mine",
+	"stages": {
+		"development": {
+			"domain": "hello.natalian.org"
+		}
+	}
+}
