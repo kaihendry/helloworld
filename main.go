@@ -2,18 +2,12 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
-
-	"github.com/apex/log"
-	"github.com/apex/log/handlers/text"
 )
-
-func init() {
-	log.SetHandler(text.Default)
-}
 
 func main() {
 
@@ -33,9 +27,7 @@ func slow(w http.ResponseWriter, r *http.Request) {
 
 	after := time.Duration(i)
 
-	log.WithFields(log.Fields{
-		"sleep": after,
-	}).Info("sleep")
+	log.Println("Sleep for", i)
 
 	time.Sleep(after * time.Second)
 
