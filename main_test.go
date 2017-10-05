@@ -1,26 +1,38 @@
 package main
 
 import (
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 )
 
-func TestHello(t *testing.T) {
-	req, _ := http.NewRequest("GET", "/", nil)
-
-	rec := httptest.NewRecorder()
-	hello(rec, req)
-
-	res := rec.Result()
-	b, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		t.Fatalf("Could not read response: %v", err)
+func TestParameters(t *testing.T) {
+	testCases := map[string]struct {
+		params     map[string]string
+		statusCode int
+	}{
+		"fast": {
+			map[string]string{"delay": "0"},
+			http.StatusOK,
+		},
+		"slow": {
+			map[string]string{"delay": "2"},
+			http.StatusOK,
+		},
 	}
 
-	if !strings.Contains(string(b), "Hello World") {
-		t.Fatal("\"Hello World\" missing")
+	for tc, tp := range testCases {
+		req, _ := http.NewRequest("GET", "/", nil)
+		q := req.URL.Query()
+		for k, v := range tp.params {
+			q.Add(k, v)
+		}
+		req.URL.RawQuery = q.Encode()
+		rec := httptest.NewRecorder()
+		root(rec, req)
+		res := rec.Result()
+		if res.StatusCode != tp.statusCode {
+			t.Errorf("`%v` failed, got %v, expected %v", tc, res.StatusCode, tp.statusCode)
+		}
 	}
 }
