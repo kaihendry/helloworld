@@ -20,7 +20,7 @@ func TestHello(t *testing.T) {
 		t.Fatalf("Could not read response: %v", err)
 	}
 
-	if !strings.Contains(string(b), "Hello World") {
-		t.Fatal("\"Hello World\" missing")
+	if !strings.Contains(string(b), "helloworld") {
+		t.Fatal("\"helloworld\" missing")
 	}
 }
