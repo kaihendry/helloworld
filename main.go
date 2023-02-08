@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"runtime"
@@ -17,19 +16,22 @@ var (
 )
 
 func main() {
-	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout)))
-	log.Println("Version:", os.Getenv("version"), "GoVersion:", GoVersion)
+
+	logger := slog.New(slog.NewJSONHandler(os.Stdout))
+	slog.SetDefault(logger.With("version", os.Getenv("version"), "goversion", GoVersion))
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", hello)
 	wrappedMux := NewLogger(mux)
 
+	var err error
 	if _, ok := os.LookupEnv("AWS_EXECUTION_ENV"); ok {
-		log.Fatal(gateway.ListenAndServe("", wrappedMux), nil)
+		err = gateway.ListenAndServe("", wrappedMux)
 	} else {
-		log.Printf("Assuming local development")
-		log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("PORT")), wrappedMux), nil)
+		slog.Info("local development", "port", os.Getenv("PORT"))
+		err = http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("PORT")), wrappedMux)
 	}
+	slog.Error("error listening", err)
 }
 
 func hello(w http.ResponseWriter, r *http.Request) {
