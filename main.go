@@ -13,13 +13,12 @@ import (
 )
 
 var (
-	Version   string
 	GoVersion = runtime.Version()
 )
 
 func main() {
 	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout)))
-	log.Println("Version:", Version, "GoVersion:", GoVersion)
+	log.Println("Version:", os.Getenv("version"), "GoVersion:", GoVersion)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", hello)
@@ -34,6 +33,6 @@ func main() {
 }
 
 func hello(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("X-Version", fmt.Sprintf("Version: %s GoVersion: %s", Version, GoVersion))
+	w.Header().Set("X-Version", fmt.Sprintf("Version: %s GoVersion: %s", os.Getenv("version"), GoVersion))
 	fmt.Fprintf(w, "https://github.com/kaihendry/helloworld %s\n", time.Now())
 }
