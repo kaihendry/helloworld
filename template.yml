@@ -48,6 +48,6 @@ Outputs:
     Description: "Implicit IAM Role created for Hello World function"
     Value: !GetAtt HelloRole.Arn
   GatewayEndPoint:
-    Value: !Sub "https://${Gateway}.execute-api.${AWS::Region}.amazonaws.com/"
+    Value: !Ref Gateway.DomainName
   HelloLogs:
     Value: !Sub "sam logs --name ${Hello} --region ${AWS::Region} --tail"
