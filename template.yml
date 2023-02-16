@@ -40,7 +40,7 @@ Resources:
         Variables:
           version: !Ref Version
 
-Outputs:
+Outputs: # https://github.com/aws/aws-sam-cli/issues/4670
   Hello:
     Description: "First Lambda Function ARN"
     Value: !GetAtt Hello.Arn
