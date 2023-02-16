@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/apex/gateway/v2 v2.0.0
-	golang.org/x/exp v0.0.0-20230206171751-46f607a40771
+	golang.org/x/exp v0.0.0-20230213192124-5e25df0256eb
 )
 
 require (
