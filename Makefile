@@ -24,7 +24,7 @@ sam-tail-logs:
 	sam logs --stack-name $(STACK) --tail
 
 sync:
-	sam sync --stack-name $(STACK)
+	sam sync --watch --stack-name $(STACK)
 
 sam-list-endpoints:
 	sam list stack-outputs --stack-name $(STACK)

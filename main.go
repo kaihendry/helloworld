@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/apex/gateway/v2"
-	"golang.org/x/exp/slog"
+	log "golang.org/x/exp/slog"
 )
 
 var (
@@ -17,21 +17,20 @@ var (
 
 func main() {
 
-	logger := slog.New(slog.NewJSONHandler(os.Stdout))
-	slog.SetDefault(logger.With("version", os.Getenv("version"), "goversion", GoVersion))
-
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", hello)
 	wrappedMux := NewLogger(mux)
 
 	var err error
 	if _, ok := os.LookupEnv("AWS_EXECUTION_ENV"); ok {
+		log.SetDefault(log.New(log.NewJSONHandler(os.Stdout)))
 		err = gateway.ListenAndServe("", wrappedMux)
 	} else {
-		slog.Info("local development", "port", os.Getenv("PORT"))
+		log.SetDefault(log.New(log.NewTextHandler(os.Stdout)))
+		log.Info("local development", "port", os.Getenv("PORT"))
 		err = http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("PORT")), wrappedMux)
 	}
-	slog.Error("error listening", err)
+	log.Error("error listening", err)
 }
 
 func hello(w http.ResponseWriter, r *http.Request) {

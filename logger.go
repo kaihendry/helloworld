@@ -22,7 +22,7 @@ func (l *Logger) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			"req_ip", r.RemoteAddr,
 			"req_path", r.RequestURI,
 			"size", r.ContentLength,
-			"duration", time.Since(start).Milliseconds(),
+			slog.Duration("duration", time.Since(start)),
 		)
 	}()
 	l.handler.ServeHTTP(w, r)
