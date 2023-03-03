@@ -20,14 +20,13 @@ Resources:
   Hello:
     Type: AWS::Serverless::Function
     Architectures:
-      - x86_64
+      - arm64
     Metadata:
-      # https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/building-custom-runtimes.html
       BuildMethod: makefile
     Properties:
+      Handler: main
       CodeUri: ./
-      Handler: hello
-      Runtime: go1.x
+      Runtime: provided.al2
       Events:
         CatchAll:
           Type: HttpApi
@@ -38,15 +37,3 @@ Resources:
       Environment:
         Variables:
           version: !Ref Version
-
-Outputs: # https://github.com/aws/aws-sam-cli/issues/4670
-  Hello:
-    Description: "First Lambda Function ARN"
-    Value: !GetAtt Hello.Arn
-  HelloIamRole:
-    Description: "Implicit IAM Role created for Hello World function"
-    Value: !GetAtt HelloRole.Arn
-  GatewayEndPoint:
-    Value: !Ref Gateway.DomainName
-  HelloLogs:
-    Value: !Sub "sam logs --name ${Hello} --region ${AWS::Region} --tail"
