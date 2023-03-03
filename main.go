@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/apex/gateway/v2"
+	"github.com/kaihendry/slogresponse"
 	log "golang.org/x/exp/slog"
 )
 
@@ -22,7 +23,7 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", hello)
-	wrappedMux := NewLogger(mux)
+	wrappedMux := slogresponse.New(mux)
 	var err error
 	if _, ok := os.LookupEnv("AWS_LAMBDA_FUNCTION_NAME"); ok {
 		log.SetDefault(log.New(log.NewJSONHandler(os.Stdout)))
