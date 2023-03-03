@@ -1,28 +1,30 @@
 package main
 
 import (
+	"embed"
 	"fmt"
+	"html/template"
 	"net/http"
 	"os"
 	"runtime"
-	"time"
+	"strings"
 
 	"github.com/apex/gateway/v2"
 	log "golang.org/x/exp/slog"
 )
 
-var (
-	GoVersion = runtime.Version()
-)
+var GoVersion = runtime.Version()
+
+//go:embed static
+var static embed.FS
 
 func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", hello)
 	wrappedMux := NewLogger(mux)
-
 	var err error
-	if _, ok := os.LookupEnv("AWS_EXECUTION_ENV"); ok {
+	if _, ok := os.LookupEnv("AWS_LAMBDA_FUNCTION_NAME"); ok {
 		log.SetDefault(log.New(log.NewJSONHandler(os.Stdout)))
 		err = gateway.ListenAndServe("", wrappedMux)
 	} else {
@@ -31,9 +33,27 @@ func main() {
 		err = http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("PORT")), wrappedMux)
 	}
 	log.Error("error listening", err)
+
 }
 
 func hello(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("X-Version", fmt.Sprintf("Version: %s GoVersion: %s", os.Getenv("version"), GoVersion))
-	fmt.Fprintf(w, "https://github.com/kaihendry/helloworld %s\n", time.Now())
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	t := template.Must(template.New("").ParseFS(static, "static/index.html"))
+	t.ExecuteTemplate(w, "index.html", struct {
+		Env []string
+	}{
+		Env: filter(os.Environ()),
+	})
+}
+
+func filter(env []string) []string {
+	var filtered []string
+	for _, e := range env {
+		// filter out AWS secrets
+		if !strings.HasPrefix(e, "AWS_SE") {
+			filtered = append(filtered, e)
+		}
+	}
+	return filtered
 }
