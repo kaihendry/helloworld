@@ -21,7 +21,6 @@ func (l *Logger) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			"req_method", r.Method,
 			"req_ip", r.RemoteAddr,
 			"req_path", r.RequestURI,
-			"size", r.ContentLength,
 			slog.Duration("duration", time.Since(start)),
 		)
 	}()
