@@ -19,8 +19,6 @@ Resources:
 
   Hello:
     Type: AWS::Serverless::Function
-    Metadata:
-      BuildMethod: makefile
     Properties:
       Architectures:
         - arm64
@@ -37,3 +35,5 @@ Resources:
       Environment:
         Variables:
           version: !Ref Version
+    Metadata:
+      BuildMethod: makefile

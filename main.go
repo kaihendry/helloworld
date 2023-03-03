@@ -20,7 +20,6 @@ var GoVersion = runtime.Version()
 var static embed.FS
 
 func main() {
-
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", hello)
 	wrappedMux := slogresponse.New(mux)
@@ -34,24 +33,22 @@ func main() {
 		err = http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("PORT")), wrappedMux)
 	}
 	log.Error("error listening", err)
-
 }
 
 func hello(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("X-Version", fmt.Sprintf("Version: %s GoVersion: %s", os.Getenv("version"), GoVersion))
+	w.Header().Set("X-Version", fmt.Sprintf("%s %s", os.Getenv("version"), GoVersion))
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	t := template.Must(template.New("").ParseFS(static, "static/index.html"))
 	t.ExecuteTemplate(w, "index.html", struct {
 		Env []string
 	}{
-		Env: filter(os.Environ()),
+		Env: filterAWSsecrets(os.Environ()),
 	})
 }
 
-func filter(env []string) []string {
+func filterAWSsecrets(env []string) []string {
 	var filtered []string
 	for _, e := range env {
-		// filter out AWS secrets
 		if !strings.HasPrefix(e, "AWS_SE") {
 			filtered = append(filtered, e)
 		}
