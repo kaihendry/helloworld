@@ -19,11 +19,11 @@ Resources:
 
   Hello:
     Type: AWS::Serverless::Function
-    Architectures:
-      - arm64
     Metadata:
       BuildMethod: makefile
     Properties:
+      Architectures:
+        - arm64
       Handler: main
       CodeUri: ./
       Runtime: provided.al2
