@@ -25,7 +25,6 @@ Resources:
       # https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/building-custom-runtimes.html
       BuildMethod: makefile
     Properties:
-      FunctionName: !Sub ${AWS::StackName}-hello
       CodeUri: ./
       Handler: hello
       Runtime: go1.x
