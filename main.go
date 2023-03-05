@@ -8,10 +8,13 @@ import (
 	"os"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/apex/gateway/v2"
 	"github.com/kaihendry/slogresponse"
 	log "golang.org/x/exp/slog"
+
+	_ "net/http/pprof"
 )
 
 var GoVersion = runtime.Version()
@@ -22,6 +25,7 @@ var static embed.FS
 func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", hello)
+	mux.HandleFunc("/debug/pprof/", http.DefaultServeMux.ServeHTTP)
 	wrappedMux := slogresponse.New(mux)
 	var err error
 	if _, ok := os.LookupEnv("AWS_LAMBDA_FUNCTION_NAME"); ok {
@@ -35,7 +39,14 @@ func main() {
 	log.Error("error listening", err)
 }
 
+// slow function
+func slow() {
+	log.Warn("slow function")
+	time.Sleep(1 * time.Second)
+}
+
 func hello(w http.ResponseWriter, r *http.Request) {
+	// slow()
 	w.Header().Set("X-Version", fmt.Sprintf("%s %s", os.Getenv("version"), GoVersion))
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	t := template.Must(template.New("").ParseFS(static, "static/index.html"))
