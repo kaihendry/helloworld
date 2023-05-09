@@ -4,6 +4,7 @@ Transform: AWS::Serverless-2016-10-31
 Parameters:
   DomainName:
     Type: String
+    Default: hellosam.dabase.com
   ACMCertificateArn:
     Type: String
   Version:
@@ -37,3 +38,8 @@ Resources:
           version: !Ref Version
     Metadata:
       BuildMethod: makefile
+
+Outputs:
+  CNAME:
+    Description: The regional domain name for CNAME value
+    Value: !GetAtt [Gateway.DomainName, RegionalDomainName]

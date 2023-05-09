@@ -9,7 +9,7 @@ deploy:
 	sam build
 	sam deploy --no-progressbar --resolve-s3 \
 	 --stack-name $(STACK) --parameter-overrides DomainName=$(DOMAINNAME) ACMCertificateArn=$(ACMCERTIFICATEARN) Version=$(VERSION) \
-	 --no-confirm-changeset --no-fail-on-empty-changeset --capabilities CAPABILITY_IAM --disable-rollback
+	 --no-confirm-changeset --no-fail-on-empty-changeset --capabilities CAPABILITY_IAM
 
 build-Hello:
 	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o ${ARTIFACTS_DIR}/bootstrap
