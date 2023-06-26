@@ -8,7 +8,6 @@ import (
 	"os"
 	"runtime"
 	"strings"
-	"time"
 
 	"github.com/apex/gateway/v2"
 	"github.com/kaihendry/slogresponse"
@@ -39,16 +38,11 @@ func main() {
 	log.Error("error listening", err)
 }
 
-// slow function
-func slow() {
-	log.Warn("slow function")
-	time.Sleep(1 * time.Second)
-}
-
 func hello(w http.ResponseWriter, r *http.Request) {
-	// slow()
 	w.Header().Set("X-Version", fmt.Sprintf("%s %s", os.Getenv("version"), GoVersion))
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	http.Error(w, "error", http.StatusInternalServerError)
+	return
 	t := template.Must(template.New("").ParseFS(static, "static/index.html"))
 	t.ExecuteTemplate(w, "index.html", struct {
 		Env []string
