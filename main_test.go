@@ -1,7 +1,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -15,7 +15,7 @@ func TestHello(t *testing.T) {
 	hello(rec, req)
 
 	res := rec.Result()
-	b, err := ioutil.ReadAll(res.Body)
+	b, err := io.ReadAll(res.Body)
 	if err != nil {
 		t.Fatalf("Could not read response: %v", err)
 	}

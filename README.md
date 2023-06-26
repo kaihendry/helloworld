@@ -1,4 +1,4 @@
-# helloworld in AWS SAM
+# Serverless on the Beach
 
-	brew install aws-sam-cli
+	brew install awscli aws-sam-cli
 

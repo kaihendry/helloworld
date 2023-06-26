@@ -29,3 +29,8 @@ Resources:
           version: !Ref Version
     Metadata:
       BuildMethod: makefile
+
+Outputs:
+  ApiUrl:
+    Description: Endpoint URL
+    Value: !Sub "https://${Gateway}.execute-api.${AWS::Region}.amazonaws.com/"

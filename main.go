@@ -24,14 +24,14 @@ var static embed.FS
 func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", hello)
-	mux.HandleFunc("/debug/pprof/", http.DefaultServeMux.ServeHTTP)
+
 	wrappedMux := slogresponse.New(mux)
 	var err error
 	if _, ok := os.LookupEnv("AWS_LAMBDA_FUNCTION_NAME"); ok {
-		log.SetDefault(log.New(log.NewJSONHandler(os.Stdout)))
+		log.SetDefault(log.New(log.NewJSONHandler(os.Stdout, nil)))
 		err = gateway.ListenAndServe("", wrappedMux)
 	} else {
-		log.SetDefault(log.New(log.NewTextHandler(os.Stdout)))
+		log.SetDefault(log.New(log.NewTextHandler(os.Stdout, nil)))
 		log.Info("local development", "port", os.Getenv("PORT"))
 		err = http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("PORT")), wrappedMux)
 	}
@@ -41,8 +41,6 @@ func main() {
 func hello(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("X-Version", fmt.Sprintf("%s %s", os.Getenv("version"), GoVersion))
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	http.Error(w, "error", http.StatusInternalServerError)
-	return
 	t := template.Must(template.New("").ParseFS(static, "static/index.html"))
 	t.ExecuteTemplate(w, "index.html", struct {
 		Env []string

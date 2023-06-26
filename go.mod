@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/apex/gateway/v2 v2.0.0
 	github.com/kaihendry/slogresponse v0.0.0-20230303203516-1e8327da21fc
-	golang.org/x/exp v0.0.0-20230425010034-47ecfdc1ba53
+	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1
 )
 
 require (
