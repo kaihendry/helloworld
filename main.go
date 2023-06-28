@@ -29,10 +29,10 @@ func main() {
 	wrappedMux := slogresponse.New(mux)
 	var err error
 	if _, ok := os.LookupEnv("AWS_LAMBDA_FUNCTION_NAME"); ok {
-		log.SetDefault(log.New(log.NewJSONHandler(os.Stdout)))
+		log.SetDefault(log.New(log.NewJSONHandler(os.Stdout, nil)))
 		err = gateway.ListenAndServe("", wrappedMux)
 	} else {
-		log.SetDefault(log.New(log.NewTextHandler(os.Stdout)))
+		log.SetDefault(log.New(log.NewTextHandler(os.Stdout, nil)))
 		log.Info("local development", "port", os.Getenv("PORT"))
 		err = http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("PORT")), wrappedMux)
 	}
