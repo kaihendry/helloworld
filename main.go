@@ -1,60 +1,49 @@
 package main
 
 import (
-	"embed"
 	"fmt"
-	"html/template"
 	"net/http"
 	"os"
-	"runtime"
-	"strings"
 
 	"github.com/apex/gateway/v2"
-	"github.com/kaihendry/slogresponse"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	slogecho "github.com/samber/slog-echo"
+	"golang.org/x/exp/slog"
 	log "golang.org/x/exp/slog"
-
-	_ "net/http/pprof"
 )
 
-var GoVersion = runtime.Version()
-
-//go:embed static
-var static embed.FS
-
 func main() {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", hello)
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
-	wrappedMux := slogresponse.New(mux)
-	var err error
+	if _, ok := os.LookupEnv("AWS_LAMBDA_FUNCTION_NAME"); ok {
+		logger = log.New(log.NewJSONHandler(os.Stdout, nil))
+	}
+
+	// Echo instance
+	e := echo.New()
+
+	// Middleware
+	e.Use(slogecho.New(logger))
+	e.Use(middleware.Recover())
+
+	// Routes
+	e.GET("/", func(c echo.Context) error {
+		return c.String(http.StatusOK, "Hello, World!")
+	})
+
+	// simulate an error
+	e.GET("/error", func(c echo.Context) error {
+		return echo.NewHTTPError(http.StatusInternalServerError, "A simulated error")
+	})
+
 	if _, ok := os.LookupEnv("AWS_LAMBDA_FUNCTION_NAME"); ok {
 		log.SetDefault(log.New(log.NewJSONHandler(os.Stdout, nil)))
-		err = gateway.ListenAndServe("", wrappedMux)
+		gateway.ListenAndServe("", e)
 	} else {
 		log.SetDefault(log.New(log.NewTextHandler(os.Stdout, nil)))
 		log.Info("local development", "port", os.Getenv("PORT"))
-		err = http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("PORT")), wrappedMux)
+		e.Start(fmt.Sprintf(":%s", os.Getenv("PORT")))
 	}
-	log.Error("error listening", err)
-}
 
-func hello(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("X-Version", fmt.Sprintf("%s %s", os.Getenv("version"), GoVersion))
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	t := template.Must(template.New("").ParseFS(static, "static/index.html"))
-	t.ExecuteTemplate(w, "index.html", struct {
-		Env []string
-	}{
-		Env: filterAWSsecrets(os.Environ()),
-	})
-}
-
-func filterAWSsecrets(env []string) []string {
-	var filtered []string
-	for _, e := range env {
-		if !strings.HasPrefix(e, "AWS_SE") {
-			filtered = append(filtered, e)
-		}
-	}
-	return filtered
 }
