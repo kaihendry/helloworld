@@ -1,26 +1,34 @@
 package main
 
 import (
-	"io/ioutil"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 )
 
 func TestHello(t *testing.T) {
-	req, _ := http.NewRequest("GET", "/", nil)
-
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
-	hello(rec, req)
+	http.HandlerFunc(hello).ServeHTTP(rec, req)
 
-	res := rec.Result()
-	b, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		t.Fatalf("Could not read response: %v", err)
+	if rec.Code != http.StatusOK {
+		t.Errorf("expected status 200 OK, got %d", rec.Code)
 	}
 
-	if !strings.Contains(string(b), "helloworld") {
-		t.Fatal("\"helloworld\" missing")
+	// Check the Content-Type header
+	if contentType := rec.Header().Get("Content-Type"); contentType != "application/json; charset=utf-8" {
+		t.Errorf("expected Content-Type application/json; charset=utf-8, got %s", contentType)
+	}
+
+	// Check response body
+	var response map[string]string
+	if err := json.Unmarshal(rec.Body.Bytes(), &response); err != nil {
+		t.Fatalf("failed to unmarshal response body: %v", err)
+	}
+
+	expected := "hello world"
+	if message, ok := response["message"]; !ok || message != expected {
+		t.Errorf("expected message %v, got %v", expected, response["message"])
 	}
 }
