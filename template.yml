@@ -4,13 +4,17 @@ Transform: AWS::Serverless-2016-10-31
 Parameters:
   DomainName:
     Type: String
-    Default: hellosam.dabase.com
   ACMCertificateArn:
-    Type: String
-  Version:
     Type: String
 
 Resources:
+  # Create log group for Access logs
+  AccessLogGroup:
+    Type: "AWS::Logs::LogGroup"
+    Properties:
+      RetentionInDays: 30
+      LogGroupName: !Ref DomainName
+
   Gateway:
     Type: AWS::Serverless::HttpApi
     Properties:
@@ -18,13 +22,13 @@ Resources:
         DomainName: !Ref DomainName
         CertificateArn: !Ref ACMCertificateArn
 
-  Hello:
+  MainFunction:
     Type: AWS::Serverless::Function
     Properties:
       Architectures:
         - arm64
+      CodeUri: .
       Handler: main
-      CodeUri: ./
       Runtime: provided.al2
       Events:
         CatchAll:
@@ -33,11 +37,13 @@ Resources:
             ApiId: !Ref Gateway
             Path: /{proxy+}
             Method: ANY
-      Environment:
-        Variables:
-          version: !Ref Version
     Metadata:
       BuildMethod: makefile
+
+Globals:
+  Function:
+    LoggingConfig:
+      LogFormat: JSON
 
 Outputs:
   CNAME:

@@ -1,17 +1,18 @@
 STACK = helloworld-sam
-VERSION = $(shell git rev-parse --abbrev-ref HEAD)-$(shell git rev-parse --short HEAD)
-SAM_CLI_TELEMETRY=0
+export SAM_CLI_TELEMETRY=0
 
-DOMAINNAME = hellosam.dabase.com # https://ap-southeast-1.console.aws.amazon.com/apigateway/main/publish/domain-names?api=b0p0urf4eb&domain=hellosam.dabase.com&region=ap-southeast-1
-ACMCERTIFICATEARN = arn:aws:acm:ap-southeast-1:407461997746:certificate/87b0fd84-fb44-4782-b7eb-d9c7f8714908
+.PHONY: build deploy validate destroy
+
+DOMAINNAME = hellosam.dabase.com
+ACMCERTIFICATEARN = arn:aws:acm:eu-west-2:407461997746:certificate/9083a66b-72b6-448d-9bce-6ee2e2e52e36
 
 deploy:
 	sam build
-	sam deploy --no-progressbar --resolve-s3 \
-	 --stack-name $(STACK) --parameter-overrides DomainName=$(DOMAINNAME) ACMCertificateArn=$(ACMCERTIFICATEARN) Version=$(VERSION) \
-	 --no-confirm-changeset --no-fail-on-empty-changeset --capabilities CAPABILITY_IAM
+	sam deploy --no-progressbar --resolve-s3 --stack-name $(STACK) --parameter-overrides DomainName=$(DOMAINNAME) ACMCertificateArn=$(ACMCERTIFICATEARN) --no-confirm-changeset --no-fail-on-empty-changeset --capabilities CAPABILITY_IAM --disable-rollback
 
-build-Hello:
+build-MainFunction:
+	find
+	pwd
 	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o ${ARTIFACTS_DIR}/bootstrap
 
 validate:
@@ -23,8 +24,5 @@ destroy:
 sam-tail-logs:
 	sam logs --stack-name $(STACK) --tail
 
-sync:
-	sam sync --watch --stack-name $(STACK)
-
-sam-list-endpoints:
-	sam list stack-outputs --stack-name $(STACK)
+clean:
+	rm -rf main gin-bin
